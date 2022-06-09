@@ -1,4 +1,4 @@
-FROM hyperf/hyperf:7.4-alpine-v3.14-swoole
+FROM hyperf/hyperf:7.4-alpine-v3.15-swoole
 LABEL maintainer="Hyperf Developers <group@hyperf.io>" version="1.0" license="MIT"
 
 ##
@@ -27,13 +27,26 @@ RUN set -ex \
     && rm /opt/ext/igbinary-3.2.2.tgz \
     && cd /tmp/igbinary \
     && phpize && ./configure --with-php-config=/usr/bin/php-config7 --enable-reader && make && make install \
+    && echo "extension=igbinary.so" > /etc/php7/conf.d/igbinary.ini \
     && mkdir -p /tmp/xlswriter \
     && tar -xf /opt/ext/xlswriter-1.5.1.tgz -C /tmp/xlswriter --strip-components=1 \
     && rm /opt/ext/xlswriter-1.5.1.tgz \
     && cd /tmp/xlswriter \
     && phpize && ./configure --with-php-config=/usr/bin/php-config7 --enable-reader && make && make install \
     && echo "extension=xlswriter.so" > /etc/php7/conf.d/xlswriter.ini \
-    && rm -fr /tmp/xlswriter \
+    && mkdir -p /tmp/pcre2 \
+    && tar -xf /opt/ext/pcre2-10.37.tar.gz -C /tmp/pcre2 --strip-components=1 \
+    && rm /opt/ext/pcre2-10.37.tar.gz \
+    && cd /tmp/pcre2 \
+    && ./configure --prefix=/usr/local/pcre2 && make && make install \
+    && ln -s /usr/local/pcre2 /usr/sbin/pcre2 \
+#    && ln -s /usr/local/pcre2/include/pcre2.h /usr/include/pcre2.h \
+    && mkdir -p /tmp/mongodb \
+    && tar -xf /opt/ext/mongodb-1.10.0.tgz -C /tmp/mongodb --strip-components=1 \
+    && rm /opt/ext/mongodb-1.10.0.tgz \
+    && cd /tmp/mongodb \
+    && phpize && ./configure --with-php-config=/usr/bin/php-config7 --enable-reader && make && make install \
+    && echo "extension=mongodb.so" > /etc/php7/conf.d/mongodb.ini \
     # install composer
     && cp /opt/ext/composer.phar /tmp/composer.phar \
     && cd /tmp \
